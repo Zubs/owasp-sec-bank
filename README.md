@@ -1,5 +1,5 @@
 # OWASP Sec Bank
-This is a database-driven web application developed as a research artefact for my BSc Computer Science dissertation.
+This is a database-driven web application developed as a research artefact for my B.Sc. Computer Science dissertation.
 
 The project addresses the gap between theoretical security guidelines and practical implementations. It utilizes an **A/B testing methodology**, where two parallel versions of the same banking application will be built to facilitate a direct comparison of vulnerability behavior and mitigation effectiveness.
 
@@ -7,7 +7,7 @@ The project addresses the gap between theoretical security guidelines and practi
 2. **Version B (Secure):** Implements industry best practices, including RBAC, parameterized queries, secure session management, etc.
 
 ## Technologies used
-- Frontend: Vuejs
+- Frontend: Vue.js
 - Backend: Expressjs
 - Database: PostgresQL
 
@@ -42,3 +42,4 @@ The project addresses the gap between theoretical security guidelines and practi
 - Accounts
 - Transactions
 - Logs
+- Tokens
