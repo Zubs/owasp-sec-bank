@@ -28,9 +28,9 @@ The project addresses the gap between theoretical security guidelines and practi
 ### Insecure
 - [ ] Landing page
 - [ ] Authentication
-  - [ ] Register
-  - [ ] Login
-  - [ ] Logout
+  - [x] Register
+  - [x] Login
+  - [x] Logout
   - [ ] Dashboard
     - [ ] Money transfer
     - [ ] Transaction history
