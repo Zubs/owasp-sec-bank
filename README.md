@@ -1,4 +1,7 @@
 # OWASP Sec Bank
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c6a91eaabf884b6684da6b8440483f64)](https://app.codacy.com/gh/Zubs/owasp-sec-bank?utm_source=github.com&utm_medium=referral&utm_content=Zubs/owasp-sec-bank&utm_campaign=Badge_Grade)
+
 This is a database-driven web application developed as a research artefact for my BSc Computer Science dissertation.
 
 The project addresses the gap between theoretical security guidelines and practical implementations. It utilizes an **A/B testing methodology**, where two parallel versions of the same banking application will be built to facilitate a direct comparison of vulnerability behavior and mitigation effectiveness.
