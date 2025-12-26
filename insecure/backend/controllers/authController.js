@@ -3,6 +3,14 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = 'super_secret_key_123';
 
+const generateAccountNumber = () => {
+    return Math.floor(10000000 + Math.random() * 90000000).toString();
+}
+
+const generateSortCode = () => {
+    return '12-34-56';
+}
+
 exports.register = async (req, res) => {
     const {
         username,
@@ -11,14 +19,38 @@ exports.register = async (req, res) => {
         email
     } = req.body;
 
-    const query = `
-        INSERT INTO users (username, password, full_name, email)
-        VALUES ('${username}', '${password}', '${full_name}', '${email}') RETURNING *;
-    `;
-
     try {
-        const result = await pool.query(query);
-        res.status(201).json({ message: 'User registered', user: result.rows[0] });
+        const query = `
+            INSERT INTO users (username, password, full_name, email)
+            VALUES ('${username}', '${password}', '${full_name}', '${email}') RETURNING *;
+        `;
+
+        const userResult = await pool.query(query);
+        const user = userResult.rows[0];
+        const accNum = generateAccountNumber();
+        const sortCode = generateSortCode();
+        // Create account with £100 min fee
+        const accountQuery = `
+            INSERT INTO accounts (user_id, account_number, sort_code, account_type, balance)
+            VALUES (${user.user_id}, '${accNum}', '${sortCode}', 'Current', 100.00) RETURNING *;
+        `;
+
+        const accountResult = await pool.query(accountQuery);
+        const account = accountResult.rows[0];
+        const token = jwt.sign(
+            { userId: user.user_id, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+        );
+
+        await pool.query(`INSERT INTO tokens (user_id, token) VALUES (${user.user_id}, '${token}')`);
+
+        res.status(201).json({
+            message: 'User registered',
+            user,
+            token,
+            account
+        });
     } catch (error) {
         res.status(500).json({ error: error.message, detail: error });
     }
@@ -46,8 +78,7 @@ exports.login = async (req, res) => {
                 { expiresIn: '30d' }
             );
 
-            const tokenQuery = `INSERT INTO tokens (user_id, token) VALUES (${user.user_id}, '${token}')`;
-            await pool.query(tokenQuery);
+            await pool.query(`INSERT INTO tokens (user_id, token) VALUES (${user.user_id}, '${token}')`);
 
             res.status(200).json({
                 message: 'Login successful',
