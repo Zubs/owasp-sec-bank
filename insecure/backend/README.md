@@ -1,5 +1,8 @@
 # Vulnerable app
 
+## API Documentation
+[https://documenter.getpostman.com/view/33365941/2sBXVZpuxT](https://documenter.getpostman.com/view/33365941/2sBXVZpuxT)
+
 ## Vulnerabilities
 
 ### 1. Broken Access Control

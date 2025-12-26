@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "swagger": "node swagger.js",
+    "start": "npm run swagger && node index.js",
     "migrate": "node-pg-migrate",
     "migrate:create": "node-pg-migrate create",
     "migrate:up": "node-pg-migrate up",
@@ -24,5 +25,8 @@
     "pg": "^8.16.3",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "swagger-autogen": "^2.23.7"
   }
 }
