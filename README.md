@@ -17,24 +17,30 @@ The project addresses the gap between theoretical security guidelines and practi
 - [ ] Landing page
 - [ ] Authentication
     - [ ] Register
+        - [x] Create Account
     - [ ] Login
     - [ ] Logout
     - [ ] Dashboard
         - [ ] Money transfer
+          - Lookup account (recipient)
         - [ ] Transaction history
         - [ ] View/Manage profile
+        - [ ] View account details
     - [ ] Admin Dashboard
 
 ### Insecure
 - [ ] Landing page
 - [ ] Authentication
   - [x] Register
+    - [x] Create Account
   - [x] Login
   - [x] Logout
   - [ ] Dashboard
     - [ ] Money transfer
+      - [x] Lookup account (recipient)
     - [ ] Transaction history
     - [ ] View/Manage profile
+    - [x] View account details
   - [ ] Admin Dashboard
 
 ## DB Schemas

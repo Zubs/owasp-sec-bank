@@ -7,6 +7,19 @@
 
 ### 1. Broken Access Control
 
+- Reliance on the 'id' parameter from the URL, NOT the authenticated token. No check to see if `req.user.id === req.params.id`
+- No access control checks on *protected* route
+
+```javascript
+const userId = req.params.id;
+
+const query = `SELECT * FROM accounts WHERE user_id = ${userId}`;
+```
+
+```javascript
+router.get('/user/:id', accountController.getAccount);
+```
+
 ### 2. Cryptographic Failures
 
 - Storing password as plain text

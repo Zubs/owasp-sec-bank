@@ -8,6 +8,7 @@ const swaggerFile = require('./swagger-output.json'); // Import the auto-generat
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const helloWorldRoutes = require('./routes/helloWorldRoutes');
+const accountRoutes = require('./routes/accountRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 1234;
@@ -20,8 +21,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 app.get('/api-docs.json', (req, res) => res.json(swaggerFile));
 
 // --- API Routes ---
-app.use('/api/auth', authRoutes);
 app.use('/api', helloWorldRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/account', accountRoutes);
 
 app.listen(PORT, () => {
     console.log(`Vulnerable Server running at http://localhost:${PORT}/api`);

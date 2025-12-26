@@ -27,16 +27,37 @@ exports.register = async (req, res) => {
 
         const userResult = await pool.query(query);
         const user = userResult.rows[0];
-        const accNum = generateAccountNumber();
-        const sortCode = generateSortCode();
-        // Create account with £100 min fee
-        const accountQuery = `
-            INSERT INTO accounts (user_id, account_number, sort_code, account_type, balance)
-            VALUES (${user.user_id}, '${accNum}', '${sortCode}', 'Current', 100.00) RETURNING *;
-        `;
+        let accountCreated = false;
+        let account = null;
+        let attempts = 0;
 
-        const accountResult = await pool.query(accountQuery);
-        const account = accountResult.rows[0];
+        while (!accountCreated && attempts < 5) {
+            try {
+                const accNum = generateAccountNumber();
+                const sortCode = generateSortCode();
+                const accountQuery = `
+                    INSERT INTO accounts (user_id, account_number, sort_code, account_type, balance)
+                    VALUES (${user.user_id}, '${accNum}', '${sortCode}', 'Current', 100.00) RETURNING *;
+                `;
+
+                const accountResult = await pool.query(accountQuery);
+                account = accountResult.rows[0];
+                accountCreated = true;
+            } catch (err) {
+                // Postgres error 23505 = Unique Violation. If so, retry.
+                if (err.code === '23505') {
+                    attempts++;
+                    console.log("Account number collision, retrying...");
+                } else {
+                    throw err;
+                }
+            }
+        }
+
+        if (!accountCreated) {
+            throw new Error("Failed to generate a unique account number after 5 attempts");
+        }
+
         const token = jwt.sign(
             { userId: user.user_id, role: user.role },
             JWT_SECRET,
