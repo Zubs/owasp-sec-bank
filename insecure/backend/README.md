@@ -9,6 +9,7 @@
 
 - Reliance on the 'id' parameter from the URL, NOT the authenticated token. No check to see if `req.user.id === req.params.id`
 - No access control checks on *protected* route
+- Trusted user provided `from_account_id` for transfers. We DO NOT check if this account actually belongs to the logged-in user
 
 ```javascript
 const userId = req.params.id;
@@ -31,7 +32,7 @@ const JWT_SECRET = 'super_secret_key_123';
 
 ### 3. Injection
 
-- Concatenating user input directly into the SQL string.
+- Concatenating user input directly into the SQL string, on many occasions
 
 ```javascript
 const query = `
@@ -43,10 +44,6 @@ const query = `
 ```javascript
 const query = `DELETE FROM tokens WHERE token = '${token}'`;
 ```
-
-#### Exploitation
-
-- Attacker can input `' OR '1'='1` as the username to bypass login.
 
 ### 4. Insecure Design
 

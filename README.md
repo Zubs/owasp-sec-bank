@@ -11,37 +11,41 @@ The project addresses the gap between theoretical security guidelines and practi
 - Backend: Expressjs
 - Database: PostgresQL
 
+## API Documentation
+- [Postman](https://documenter.getpostman.com/view/33365941/2sBXVZpuxT)
+- Swagger: Run the app and go to `/api-docs`
+
 ## Features/Requirements (To-dos)
 
 ### Secure
 - [ ] Landing page
 - [ ] Authentication
     - [ ] Register
-        - [x] Create Account
+        - [ ] Create Account
     - [ ] Login
     - [ ] Logout
-    - [ ] Dashboard
-        - [ ] Money transfer
-          - Lookup account (recipient)
-        - [ ] Transaction history
-        - [ ] View/Manage profile
-        - [ ] View account details
-    - [ ] Admin Dashboard
+- [ ] Dashboard
+    - [ ] Money transfer
+      - [ ] Lookup account (recipient)
+    - [ ] Transaction history
+    - [ ] View/Manage profile
+    - [ ] View account details
+- [ ] Admin Dashboard
 
 ### Insecure
 - [ ] Landing page
-- [ ] Authentication
+- [x] Authentication
   - [x] Register
     - [x] Create Account
   - [x] Login
   - [x] Logout
-  - [ ] Dashboard
-    - [ ] Money transfer
-      - [x] Lookup account (recipient)
-    - [ ] Transaction history
-    - [ ] View/Manage profile
-    - [x] View account details
-  - [ ] Admin Dashboard
+- [ ] Dashboard
+  - [x] Money transfer
+    - [x] Lookup account (recipient)
+  - [x] Transaction history
+  - [ ] View/Manage profile
+  - [x] View account details
+- [ ] Admin Dashboard
 
 ## DB Schemas
 - Users
