@@ -10,6 +10,7 @@
 - Reliance on the 'id' parameter from the URL, NOT the authenticated token. No check to see if `req.user.id === req.params.id`
 - No access control checks on *protected* route
 - Trusted user provided `from_account_id` for transfers. We DO NOT check if this account actually belongs to the logged-in user
+- Privilege escalation possible because `role` update isn't checked
 
 ```javascript
 const userId = req.params.id;

@@ -10,6 +10,8 @@ const authRoutes = require('./routes/authRoutes');
 const helloWorldRoutes = require('./routes/helloWorldRoutes');
 const accountRoutes = require('./routes/accountRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const userRoutes = require('./routes/userRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 1234;
@@ -26,6 +28,8 @@ app.use('/api', helloWorldRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/account', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.listen(PORT, () => {
     console.log(`Vulnerable Server running at http://localhost:${PORT}/api`);

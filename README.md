@@ -31,6 +31,9 @@ The project addresses the gap between theoretical security guidelines and practi
     - [ ] View/Manage profile
     - [ ] View account details
 - [ ] Admin Dashboard
+  - [ ] View all users
+  - [ ] View all transactions
+  - [ ] View all system logs
 
 ### Insecure
 - [ ] Landing page
@@ -39,13 +42,16 @@ The project addresses the gap between theoretical security guidelines and practi
     - [x] Create Account
   - [x] Login
   - [x] Logout
-- [ ] Dashboard
+- [x] Dashboard
   - [x] Money transfer
     - [x] Lookup account (recipient)
   - [x] Transaction history
-  - [ ] View/Manage profile
+  - [x] View/Manage profile
   - [x] View account details
-- [ ] Admin Dashboard
+- [x] Admin Dashboard
+  - [x] View all users
+  - [x] View all transactions
+  - [x] View all system logs
 
 ## DB Schemas
 - Users
