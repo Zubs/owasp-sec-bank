@@ -48,9 +48,21 @@ const query = `DELETE FROM tokens WHERE token = '${token}'`;
 
 ### 4. Insecure Design
 
+- No negative checks on transaction amounts, allowing negative/reverse transfers
+
+```javascript
+const currentBalance = parseFloat(checkResult.rows[0].balance);
+const transferAmount = parseFloat(amount);
+
+if (currentBalance < transferAmount) {
+    return res.status(400).json({ message: 'Insufficient funds' });
+}
+```
+
 ### 5. Security Misconfiguration
 
 - Returning the raw database errors.
+- Returning env details (confidential) in test endpoint
 
 ```javascript
 try {
@@ -62,6 +74,8 @@ try {
 ```
 
 ### 6. Vulnerable and Outdated Components
+
+- Using `node-serialize` (which has a known vulnerability and hasn't been updated in years).
 
 ### 7. Identification and Authentication Failures
 
@@ -79,8 +93,41 @@ const token = jwt.sign(
 
 ### 8. Software and Data Integrity Failures
 
+- Using a serialized cookie and unserializing without verifying.
+
+```javascript
+app.use((req, res, next) => {
+    if (req.cookies.profile_pref) {
+        try {
+            const str = Buffer.from(req.cookies.profile_pref, 'base64').toString();
+            const obj = serialize.unserialize(str);
+
+            req.userPrefs = obj;
+        } catch (err) {
+            console.error("Deserialization error:", err.message);
+        }
+    }
+
+    next();
+});
+```
+
+```javascript
+const preferences = { theme: 'light', language: 'en', notifications: true };
+const serializedPref = serialize.serialize(preferences);
+const base64Pref = Buffer.from(serializedPref).toString('base64');
+
+res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
+```
+
 ### 9. Security Logging and Monitoring Failures
 
 - No logging
 
 ### 10. Server-Side Request Forgery (SSRF)
+
+- The server blindly fetches the URL provided by the user when user uploads profile image.
+
+```javascript
+
+```

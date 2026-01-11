@@ -1,5 +1,6 @@
 const pool = require('../config/db');
 const jwt = require('jsonwebtoken');
+const serialize = require('node-serialize');
 
 const JWT_SECRET = 'super_secret_key_123';
 
@@ -66,6 +67,11 @@ exports.register = async (req, res) => {
 
         await pool.query(`INSERT INTO tokens (user_id, token) VALUES (${user.user_id}, '${token}')`);
 
+        const preferences = { theme: 'light', language: 'en', notifications: true };
+        const serializedPref = serialize.serialize(preferences);
+        const base64Pref = Buffer.from(serializedPref).toString('base64');
+
+        res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
         res.status(201).json({
             message: 'User registered',
             user,
@@ -101,6 +107,11 @@ exports.login = async (req, res) => {
 
             await pool.query(`INSERT INTO tokens (user_id, token) VALUES (${user.user_id}, '${token}')`);
 
+            const preferences = { theme: 'light', language: 'en', notifications: true };
+            const serializedPref = serialize.serialize(preferences);
+            const base64Pref = Buffer.from(serializedPref).toString('base64');
+
+            res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
             res.status(200).json({
                 message: 'Login successful',
                 user,
