@@ -1,4 +1,7 @@
 const pool = require('../config/db');
+const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 exports.updateProfile = async (req, res) => {
     const userId = req.params.id;
@@ -65,5 +68,38 @@ exports.getProfile = async (req, res) => {
         res.status(200).json({ user: result.rows[0] });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+};
+
+exports.uploadAvatar = async (req, res) => {
+    const { imageUrl } = req.body;
+    const userId = req.user.userId;
+
+    if (!imageUrl) {
+        return res.status(400).json({ message: 'Image URL is required' });
+    }
+
+    try {
+        const uploadDir = path.join(__dirname, '../uploads');
+        if (!fs.existsSync(uploadDir)){
+            fs.mkdirSync(uploadDir);
+        }
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            timeout: 5000
+        });
+
+        const fileName = `${userId}.png`;
+        const filePath = path.join(uploadDir, fileName);
+
+        fs.writeFileSync(filePath, response.data);
+
+        res.status(200).json({
+            message: 'Avatar updated successfully',
+            url: `/uploads/${fileName}`
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch image', details: error.message });
     }
 };

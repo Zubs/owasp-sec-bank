@@ -7,6 +7,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerFile = require('./swagger-output.json'); // Import the auto-generated JSON
 const serialize = require('node-serialize');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 
     next();
 });
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // --- Swagger Documentation ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));

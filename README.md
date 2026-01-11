@@ -29,6 +29,8 @@ The project addresses the gap between theoretical security guidelines and practi
       - [ ] Lookup account (recipient)
     - [ ] Transaction history
     - [ ] View/Manage profile
+      - [ ] Upload profile picture/avatar
+      - [ ] View profile picture/avatar
     - [ ] View account details
 - [ ] Admin Dashboard
   - [ ] View all users
@@ -47,6 +49,8 @@ The project addresses the gap between theoretical security guidelines and practi
     - [x] Lookup account (recipient)
   - [x] Transaction history
   - [x] View/Manage profile
+    - [x] Upload profile picture/avatar
+    - [x] View profile picture/avatar
   - [x] View account details
 - [x] Admin Dashboard
   - [x] View all users
