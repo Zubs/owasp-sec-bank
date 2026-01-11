@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const verifyToken = require('../middlewares/authMiddleware');
 
-router.put('/:id', userController.updateProfile);
-router.get('/:id', userController.getProfile);
+router.put('/:id', verifyToken, userController.updateProfile);
+router.get('/:id', verifyToken, userController.getProfile);
 
 module.exports = router;
