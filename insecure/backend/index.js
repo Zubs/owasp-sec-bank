@@ -16,11 +16,20 @@ const accountRoutes = require('./routes/accountRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 1234;
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir);
+}
 
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use((req, res, next) => {
@@ -37,7 +46,7 @@ app.use((req, res, next) => {
 
     next();
 });
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadDir));
 
 // --- Swagger Documentation ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));

@@ -81,9 +81,6 @@ exports.uploadAvatar = async (req, res) => {
 
     try {
         const uploadDir = path.join(__dirname, '../uploads');
-        if (!fs.existsSync(uploadDir)){
-            fs.mkdirSync(uploadDir);
-        }
 
         const response = await axios.get(imageUrl, {
             responseType: 'arraybuffer',
