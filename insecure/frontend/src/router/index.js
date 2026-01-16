@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import TransferView from '../views/TransferView.vue'
+import ProfileView from '../views/ProfileView.vue';
 import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
@@ -10,8 +11,24 @@ const router = createRouter({
     routes: [
         { path: '/login', name: 'login', component: LoginView },
         { path: '/register', name: 'register', component: RegisterView },
-        { path: '/', name: 'dashboard', component: DashboardView, meta: { requiresAuth: true } },
-        { path: '/transfer', name: 'transfer', component: TransferView, meta: { requiresAuth: true } },
+        {
+            path: '/',
+            name: 'dashboard',
+            component: DashboardView,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/transfer',
+            name: 'transfer',
+            component: TransferView,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/profile',
+            name: 'profile',
+            component: ProfileView,
+            meta: { requiresAuth: true }
+        },
     ]
 })
 

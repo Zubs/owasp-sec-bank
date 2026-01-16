@@ -20,7 +20,7 @@ const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 1234;
-const uploadDir = path.join(__dirname, '../uploads');
+const uploadDir = path.join(__dirname, '/uploads');
 if (!fs.existsSync(uploadDir)){
     fs.mkdirSync(uploadDir);
 }
