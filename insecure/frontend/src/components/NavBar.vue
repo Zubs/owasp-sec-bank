@@ -18,6 +18,10 @@
           </template>
 
           <template v-else>
+            <li class="nav-item" v-if="authStore.user?.role === 'admin'">
+              <router-link class="nav-link text-warning" to="/admin">Admin Panel</router-link>
+            </li>
+            
             <li class="nav-item">
               <span class="nav-link text-light">Hello, {{ authStore.user?.username }}</span>
             </li>

@@ -4,6 +4,7 @@ import RegisterView from '../views/RegisterView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import TransferView from '../views/TransferView.vue'
 import ProfileView from '../views/ProfileView.vue';
+import AdminView from '../views/AdminView.vue';
 import { useAuthStore } from '../stores/authStore'
 
 const router = createRouter({
@@ -27,6 +28,12 @@ const router = createRouter({
             path: '/profile',
             name: 'profile',
             component: ProfileView,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/admin',
+            name: 'admin',
+            component: AdminView,
             meta: { requiresAuth: true }
         },
     ]
