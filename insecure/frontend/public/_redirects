@@ -1,1 +1,6 @@
+# Proxy API requests to Render Backend
+/api/* https://owasp-sec-bank-insecure.onrender.com/api/:splat  200
+/uploads/* https://owasp-sec-bank-insecure.onrender.com/uploads/:splat  200
+
+# Handle Single Page Application (SPA) routing
 /* /index.html  200
