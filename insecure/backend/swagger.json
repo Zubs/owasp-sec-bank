@@ -5,10 +5,10 @@
     "description": "Automatically generated documentation",
     "version": "1.0.0"
   },
-  "host": "https://owasp-sec-bank-insecure.onrender.com",
+  "host": "owasp-sec-bank-insecure.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http"
+    "https"
   ],
   "securityDefinitions": {
     "bearerAuth": {

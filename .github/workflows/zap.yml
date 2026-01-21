@@ -17,34 +17,35 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 1. Fix Permissions for Docker
+      # This allows the ZAP Docker container to write the report file to the disk
       - name: Fix Permissions
         run: chmod -R 777 .
 
-      # 1. GET AUTH TOKEN
+      # 2. Get Auth Token
+      # Runs your script to log in and save the token to the environment
       - name: Fetch JWT Token
         run: node insecure/backend/scripts/get_token.js
 
-      # 2. PATCH SWAGGER FILE (The Fix)
-      # We replace localhost with the live URL so ZAP attacks the right place
-      - name: Update Swagger Host
-        run: |
-          sed -i 's|http://localhost:1234|https://owasp-sec-bank-insecure.onrender.com|g' insecure/backend/swagger.json
-          # Optional: Print file to logs to verify the change
-          head -n 20 insecure/backend/swagger.json
-
-      # 3. RUN ZAP API SCAN
+      # 3. Run ZAP API Scan
+      # We removed the 'sed' step because you fixed the swagger.json source!
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
           format: openapi
+          # Point to your local swagger file
           target: 'insecure/backend/swagger.json'
+          # The Base URL of your API
           target_url: 'https://owasp-sec-bank-insecure.onrender.com'
+
           fail_action: false
           allow_issue_writing: false
           cmd_options: '-r zap_report.html'
 
         env:
+          # ZAP reads these env vars to inject headers automatically
           ZAP_AUTH_HEADER: "Authorization"
+          # This variable was set by our node script in step 2
           ZAP_AUTH_HEADER_VALUE: ${{ env.ZAP_AUTH_HEADER_VALUE }}
 
       - name: Upload HTML Report
