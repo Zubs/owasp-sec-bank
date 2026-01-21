@@ -1,18 +1,14 @@
-name: OWASP ZAP Scan
+name: OWASP ZAP API Scan
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  zap_scan:
+  zap_api_scan:
     runs-on: ubuntu-latest
-    name: Scan the Web Application
+    name: Scan the Backend API
     permissions:
       contents: read
       issues: write
@@ -21,24 +17,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # --- NEW STEP: FIX PERMISSIONS ---
-      # This allows the ZAP Docker container to write the report file to the disk
-      - name: Fix Permissions for Docker
+      - name: Fix Permissions
         run: chmod -R 777 .
-      # ---------------------------------
 
-      - name: ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
+      # 1. GET AUTH TOKEN
+      - name: Fetch JWT Token
+        run: node insecure/backend/scripts/get_token.js
+
+      # 2. RUN ZAP API SCAN
+      # This uses the 'action-api-scan' which reads Swagger files
+      - name: ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.7.0
         with:
-          target: 'https://owasp-insecure.netlify.app'
+          # Point to your local swagger file
+          format: openapi
+          target: 'insecure/backend/swagger.json'
+
+          # The Base URL of your API (overrides whatever is in swagger.json)
+          # ZAP will append paths found in swagger to this URL
+          target_url: 'https://owasp-sec-bank-insecure.onrender.com'
+
           fail_action: false
           allow_issue_writing: false
-          # We tell ZAP to output the report
           cmd_options: '-r zap_report.html'
+
+        env:
+          # ZAP reads these env vars to inject headers automatically
+          ZAP_AUTH_HEADER: "Authorization"
+          # This variable was set by our node script in the previous step
+          ZAP_AUTH_HEADER_VALUE: ${{ env.ZAP_AUTH_HEADER_VALUE }}
 
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ZAP-Security-Report
+          name: ZAP-API-Report
           path: zap_report.html
