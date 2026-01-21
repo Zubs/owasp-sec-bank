@@ -1,15 +1,12 @@
 name: OWASP ZAP Scan
 
 on:
-  # Run on every push to main
   push:
     branches:
       - main
-  # Run on every Pull Request targeting main
   pull_request:
     branches:
       - main
-  # Keep manual trigger option
   workflow_dispatch:
 
 jobs:
@@ -24,21 +21,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- NEW STEP: FIX PERMISSIONS ---
+      # This allows the ZAP Docker container to write the report file to the disk
+      - name: Fix Permissions for Docker
+        run: chmod -R 777 .
+      # ---------------------------------
+
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'https://owasp-insecure.netlify.app'
           fail_action: false
-
-          # DISABLE individual issue creation to avoid spam
           allow_issue_writing: false
-
-          # Name of the report file we want to generate
+          # We tell ZAP to output the report
           cmd_options: '-r zap_report.html'
 
       - name: Upload HTML Report
-        # This step grabs the report created above and saves it to GitHub
-        if: always() # Run this even if ZAP finds bugs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ZAP-Security-Report
