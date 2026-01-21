@@ -24,27 +24,27 @@ jobs:
       - name: Fetch JWT Token
         run: node insecure/backend/scripts/get_token.js
 
-      # 2. RUN ZAP API SCAN
-      # This uses the 'action-api-scan' which reads Swagger files
+      # 2. PATCH SWAGGER FILE (The Fix)
+      # We replace localhost with the live URL so ZAP attacks the right place
+      - name: Update Swagger Host
+        run: |
+          sed -i 's|http://localhost:1234|https://owasp-sec-bank-insecure.onrender.com|g' insecure/backend/swagger.json
+          # Optional: Print file to logs to verify the change
+          head -n 20 insecure/backend/swagger.json
+
+      # 3. RUN ZAP API SCAN
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
-          # Point to your local swagger file
           format: openapi
           target: 'insecure/backend/swagger.json'
-
-          # The Base URL of your API (overrides whatever is in swagger.json)
-          # ZAP will append paths found in swagger to this URL
           target_url: 'https://owasp-sec-bank-insecure.onrender.com'
-
           fail_action: false
           allow_issue_writing: false
           cmd_options: '-r zap_report.html'
 
         env:
-          # ZAP reads these env vars to inject headers automatically
           ZAP_AUTH_HEADER: "Authorization"
-          # This variable was set by our node script in the previous step
           ZAP_AUTH_HEADER_VALUE: ${{ env.ZAP_AUTH_HEADER_VALUE }}
 
       - name: Upload HTML Report
