@@ -4,7 +4,7 @@ const doc = {
     info: {
         title: 'Sec-Bank Vulnerable API', description: 'Automatically generated documentation',
     },
-    host: 'localhost:1234',
+    host: 'https://owasp-sec-bank-insecure.onrender.com',
     schemes: ['http'],
     securityDefinitions: {
         bearerAuth: {

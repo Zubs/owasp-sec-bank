@@ -5,7 +5,7 @@
     "description": "Automatically generated documentation",
     "version": "1.0.0"
   },
-  "host": "localhost:1234",
+  "host": "https://owasp-sec-bank-insecure.onrender.com",
   "basePath": "/",
   "schemes": [
     "http"
