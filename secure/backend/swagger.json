@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Sec-Bank Vulnerable API",
+    "title": "Sec-Bank Secure API",
     "description": "Automatically generated documentation",
     "version": "1.0.0"
   },

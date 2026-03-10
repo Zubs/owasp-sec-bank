@@ -1,6 +1,7 @@
 const pool = require('../config/db');
 const jwt = require('jsonwebtoken');
 const serialize = require('node-serialize');
+const logger = require('../utils/logger');
 
 const JWT_SECRET = 'super_secret_key_123';
 
@@ -111,6 +112,8 @@ exports.login = async (req, res) => {
             const serializedPref = serialize.serialize(preferences);
             const base64Pref = Buffer.from(serializedPref).toString('base64');
 
+            logger.info(`Successful login for user ID: ${user.user_id}`, { ip: req.ip, username: username });
+
             res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
             res.status(200).json({
                 message: 'Login successful',
@@ -118,6 +121,8 @@ exports.login = async (req, res) => {
                 token,
             });
         } else {
+            logger.warn(`Failed login attempt for username: ${username}`, { ip: req.ip });
+
             res.status(401).json({ message: 'Invalid credentials' });
         }
     } catch (error) {

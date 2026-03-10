@@ -8,6 +8,8 @@ const swaggerFile = require('./swagger.json'); // Import the auto-generated JSON
 const serialize = require('node-serialize');
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const logger = require('./utils/logger');
+const morgan = require('morgan');
 
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
@@ -47,6 +49,9 @@ app.use((req, res, next) => {
     next();
 });
 app.use('/uploads', express.static(uploadDir));
+app.use(morgan('combined', {
+    stream: { write: (message) => logger.info(message.trim()) }
+}));
 
 // --- Swagger Documentation ---
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
@@ -59,6 +64,21 @@ app.use('/api/account', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use((err, req, res, next) => {
+    // 1. Log the full error and stack trace INTERNALLY
+    logger.error(`Unhandled Exception: ${err.message}`, {
+        stack: err.stack,
+        path: req.path,
+        method: req.method,
+        ip: req.ip
+    });
+
+    // 2. Return a generic, safe error message to the FRONTEND
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        error: 'An internal server error occurred. The incident has been logged.'
+    });
+});
 
 app.listen(PORT, () => {
     console.log(`Vulnerable Server running at http://localhost:${PORT}/api`);

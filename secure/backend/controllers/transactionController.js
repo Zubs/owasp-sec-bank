@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const logger = require('../utils/logger');
 
 exports.transferFunds = async (req, res) => {
     const {
@@ -46,6 +47,13 @@ exports.transferFunds = async (req, res) => {
             VALUES (${from_account_id}, ${to_account_id}, ${transferAmount}, '${description}') RETURNING *
         `;
         const result = await pool.query(logQuery);
+
+        logger.info(`Transfer executed`, {
+            senderId: from_account_id,
+            receiverId: to_account_id,
+            amount: amount,
+            ip: req.ip
+        });
 
         res.status(200).json({
             message: 'Transfer successful',

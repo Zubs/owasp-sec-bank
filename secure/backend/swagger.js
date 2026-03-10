@@ -2,7 +2,7 @@ const swaggerAutogen = require('swagger-autogen')();
 
 const doc = {
     info: {
-        title: 'Sec-Bank Vulnerable API', description: 'Automatically generated documentation',
+        title: 'Sec-Bank Secure API', description: 'Automatically generated documentation',
     },
     host: 'owasp-sec-bank-insecure.onrender.com',
     schemes: ['https'],
