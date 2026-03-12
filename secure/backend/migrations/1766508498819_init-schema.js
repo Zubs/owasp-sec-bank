@@ -12,7 +12,7 @@ exports.up = (pgm) => {
     pgm.sql(`
         CREATE TABLE users
         (
-            user_id    SERIAL PRIMARY KEY,
+            user_id    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             username   VARCHAR(50)  NOT NULL UNIQUE,
             password   VARCHAR(255) NOT NULL,
             full_name  VARCHAR(100) NOT NULL,
@@ -25,8 +25,8 @@ exports.up = (pgm) => {
     pgm.sql(`
         CREATE TABLE accounts
         (
-            account_id     SERIAL PRIMARY KEY,
-            user_id        INTEGER     NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+            account_id     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id        UUID     NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
             account_number VARCHAR(20) NOT NULL UNIQUE,
             sort_code      VARCHAR(10) NOT NULL,
             account_type   VARCHAR(20) NOT NULL,
@@ -38,9 +38,9 @@ exports.up = (pgm) => {
     pgm.sql(`
         CREATE TABLE transactions
         (
-            transaction_id  SERIAL PRIMARY KEY,
-            from_account_id INTEGER REFERENCES accounts (account_id),
-            to_account_id   INTEGER        NOT NULL REFERENCES accounts (account_id),
+            transaction_id  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            from_account_id UUID REFERENCES accounts (account_id),
+            to_account_id   UUID        NOT NULL REFERENCES accounts (account_id),
             amount          DECIMAL(10, 2) NOT NULL,
             description     TEXT,
             status          VARCHAR(20) DEFAULT 'completed',
@@ -51,9 +51,9 @@ exports.up = (pgm) => {
     pgm.sql(`
         CREATE TABLE system_logs
         (
-            log_id      SERIAL PRIMARY KEY,
+            log_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             event_type  VARCHAR(50) NOT NULL,
-            user_id     INTEGER REFERENCES users (user_id),
+            user_id     UUID REFERENCES users (user_id),
             description TEXT,
             ip_address  VARCHAR(45),
             timestamp   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -63,8 +63,8 @@ exports.up = (pgm) => {
     pgm.sql(`
         CREATE TABLE tokens
         (
-            token_id   SERIAL PRIMARY KEY,
-            user_id    INTEGER REFERENCES users (user_id) ON DELETE CASCADE,
+            token_id   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+            user_id    UUID REFERENCES users (user_id) ON DELETE CASCADE,
             token      TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
