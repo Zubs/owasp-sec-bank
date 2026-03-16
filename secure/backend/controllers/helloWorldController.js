@@ -1,22 +1,23 @@
 const pool = require('../config/db');
+const logger = require('../utils/logger');
 
-exports.getStatus = async (req, res) => {
+exports.getStatus = async (req, res, next) => {
     try {
         // Simple query to validate DB connection
         await pool.query('SELECT 1');
 
-        res.set('Access-Control-Allow-Origin', '*');
+        logger.info(`System health check accessed`, {
+            event_type: 'SYSTEM_HEALTH_CHECK',
+            ip: req.ip
+        });
+
         res.status(200).json({
             message: "Hello World, everything is operational",
             db: "ok",
-            env: process.env,
+            env: process.env.NODE_ENV,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
-        res.status(500).json({
-            message: "System malfunction",
-            db: "unreachable",
-            error: error.message
-        });
+        next(error);
     }
 };

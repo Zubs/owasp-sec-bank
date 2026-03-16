@@ -64,6 +64,7 @@ app.use('/api/account', accountRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/admin', adminRoutes);
+
 app.use((err, req, res, next) => {
     // 1. Log the full error and stack trace INTERNALLY
     logger.error(`Unhandled Exception: ${err.message}`, {

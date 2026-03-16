@@ -5,13 +5,10 @@ const logger = require('../utils/logger');
 const bcrypt = require('bcrypt');
 
 const JWT_SECRET = 'super_secret_key_123';
+const SORT_CODE = '12-34-56';
 
 const generateAccountNumber = () => {
     return Math.floor(10000000 + Math.random() * 90000000).toString();
-}
-
-const generateSortCode = () => {
-    return '12-34-56';
 }
 
 const createToken = async (userId, role) => {
@@ -26,15 +23,14 @@ const createToken = async (userId, role) => {
     return token;
 }
 
-exports.register = async (req, res) => {
-    const {
-        username,
-        password,
-        full_name,
-        email
-    } = req.body;
-
+exports.register = async (req, res, next) => {
     try {
+        const {
+            username,
+            password,
+            full_name,
+            email
+        } = req.body;
         const saltRounds = 12;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         const query = `
@@ -50,19 +46,19 @@ exports.register = async (req, res) => {
         while (!accountCreated && attempts < 5) {
             try {
                 const accNum = generateAccountNumber();
-                const sortCode = generateSortCode();
+                const sortCode = SORT_CODE;
                 const accountQuery = `
                     INSERT INTO accounts (user_id, account_number, sort_code, account_type, balance)
                     VALUES ($1, $2, $3, 'Current', 100.00) RETURNING *;
                 `;
                 const accountResult = await pool.query(accountQuery, [user.user_id, accNum, sortCode]);
+
                 account = accountResult.rows[0];
                 accountCreated = true;
             } catch (err) {
                 // Postgres error 23505 = Unique Violation. If so, retry.
                 if (err.code === '23505') {
                     attempts++;
-                    console.log("Account number collision, retrying...");
                 } else {
                     throw err;
                 }
@@ -70,7 +66,7 @@ exports.register = async (req, res) => {
         }
 
         if (!accountCreated) {
-            return res.status(500).json({error: 'Failed to generate unique account number'});
+            return res.status(500).json({ error: 'Failed to generate unique account number' });
         }
 
         const token = await createToken(user.user_id, user.role);
@@ -78,7 +74,11 @@ exports.register = async (req, res) => {
         const serializedPref = serialize.serialize(preferences);
         const base64Pref = Buffer.from(serializedPref).toString('base64');
 
-        logger.info(`New user registered: ${username} (ID: ${user.user_id})`);
+        logger.info(`New user registered: ${username}`, {
+            event_type: 'REGISTER_SUCCESS',
+            user_id: user.user_id,
+            ip: req.ip
+        });
 
         res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
         res.status(201).json({
@@ -94,20 +94,22 @@ exports.register = async (req, res) => {
             account
         });
     } catch (error) {
-        logger.error(`Registration failed: ${error.message}`);
-
         if (error.code === '23505') {
-            return res.status(400).json({error: 'Username or email already exists'});
+            logger.warn(`Registration failed: Duplicate username or email (${username})`, {
+                event_type: 'REGISTER_FAIL_DUPLICATE',
+                ip: req.ip
+            });
+
+            return res.status(400).json({ error: 'Username or email already exists' });
         }
 
-        res.status(500).json({error: 'Internal server error during registration'});
+        next(error);
     }
 };
 
-exports.login = async (req, res) => {
-    const { username, password } = req.body;
-
+exports.login = async (req, res, next) => {
     try {
+        const { username, password } = req.body;
         const query = `SELECT * FROM users WHERE username = $1`;
         const result = await pool.query(query, [username]);
 
@@ -115,7 +117,10 @@ exports.login = async (req, res) => {
             const user = result.rows[0];
 
             if (!user) {
-                logger.warn(`Failed login attempt (user not found): ${username}`, { ip: req.ip });
+                logger.warn(`Failed login attempt for username: ${username}`, {
+                    event_type: 'AUTH_FAIL',
+                    ip: req.ip
+                });
 
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
@@ -123,7 +128,10 @@ exports.login = async (req, res) => {
             const isMatch = await bcrypt.compare(password, user.password);
 
             if (!isMatch) {
-                logger.warn(`Failed login attempt (wrong password): ${username}`, { ip: req.ip });
+                logger.warn(`Failed login attempt for username: ${username}`, {
+                    event_type: 'AUTH_FAIL',
+                    ip: req.ip
+                });
 
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
@@ -133,7 +141,11 @@ exports.login = async (req, res) => {
             const serializedPref = serialize.serialize(preferences);
             const base64Pref = Buffer.from(serializedPref).toString('base64');
 
-            logger.info(`Successful login for user ID: ${user.user_id}`, { ip: req.ip, username: username });
+            logger.info(`Successful login for user ID: ${user.user_id}`, {
+                event_type: 'AUTH_SUCCESS',
+                user_id: user.user_id,
+                ip: req.ip
+            });
 
             res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
             res.status(200).json({
@@ -153,30 +165,30 @@ exports.login = async (req, res) => {
             res.status(401).json({message: 'Invalid credentials'});
         }
     } catch (error) {
-        logger.error(`Login error: ${error.message}`);
-
-        res.status(500).json({ error: 'Internal server error during login' });
+        next(error);
     }
 };
 
-exports.logout = async (req, res) => {
-    const authHeader = req.headers['authorization'];
-
-    if (!authHeader) {
-        return res.status(400).json({ message: 'No token provided' });
-    }
-
-    const token = authHeader.split(' ')[1];
-
+exports.logout = async (req, res, next) => {
     try {
+        const authHeader = req.headers['authorization'];
+
+        if (!authHeader) {
+            return res.status(400).json({ message: 'No token provided' });
+        }
+
+        const token = authHeader.split(' ')[1];
         const query = `DELETE FROM tokens WHERE token = $1`;
 
         await pool.query(query, [token]);
 
+        logger.info(`User successfully logged out`, {
+            event_type: 'AUTH_LOGOUT',
+            ip: req.ip
+        });
+
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
-        logger.error(`Logout error: ${error.message}`);
-
-        res.status(500).json({ error: 'Internal server error during logout' });
+        next(error);
     }
 };

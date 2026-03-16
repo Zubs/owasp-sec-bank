@@ -1,4 +1,4 @@
-# Vulnerable app
+# Secure app
 
 ## API Documentation
 [https://documenter.getpostman.com/view/33365941/2sBXVZpuxT](https://documenter.getpostman.com/view/33365941/2sBXVZpuxT)
@@ -29,21 +29,6 @@ router.get('/user/:id', accountController.getAccount);
 
 ```javascript
 const JWT_SECRET = 'super_secret_key_123';
-```
-
-### 3. Injection
-
-- Concatenating user input directly into the SQL string, on many occasions
-
-```javascript
-const query = `
-    INSERT INTO users (username, password, full_name, email)
-    VALUES ('${username}', '${password}', '${full_name}', '${email}') RETURNING *;
-`;
-```
-
-```javascript
-const query = `DELETE FROM tokens WHERE token = '${token}'`;
 ```
 
 ### 4. Insecure Design
@@ -119,10 +104,6 @@ const base64Pref = Buffer.from(serializedPref).toString('base64');
 
 res.cookie('profile_pref', base64Pref, { maxAge: 900000, httpOnly: false });
 ```
-
-### 9. Security Logging and Monitoring Failures
-
-- No logging
 
 ### 10. Server-Side Request Forgery (SSRF)
 
