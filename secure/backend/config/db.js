@@ -1,4 +1,4 @@
-const {Pool} = require('pg');
+const { Pool } = require('pg');
 require('dotenv').config();
 
 // Check if we have a connection string (DATABASE_URL) or individual vars

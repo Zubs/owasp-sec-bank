@@ -13,14 +13,35 @@ class PostgresTransport extends Transport {
 
         try {
             // Extract custom metadata passed to the logger
-            const { level, message, event_type, user_id, ip, stack } = info;
+            const {
+                level,
+                message,
+                event_type,
+                user_id,
+                ip,
+                stack
+            } = info;
             const eventType = event_type || level.toUpperCase();
             const description = stack ? `${message} | Stack: ${stack}` : message;
 
             await pool.query(
-                `INSERT INTO system_logs (event_type, user_id, description, ip_address) 
-                 VALUES ($1, $2, $3, $4)`,
-                [eventType, user_id || null, description, ip || null]
+                `INSERT INTO system_logs (
+                    event_type,
+                    user_id,
+                    description,
+                    ip_address
+                ) VALUES (
+                    $1,
+                    $2,
+                    $3,
+                    $4
+                )`,
+                [
+                    eventType,
+                    user_id || null,
+                    description,
+                    ip || null
+                ]
             );
         } catch (err) {
             console.error('[FATAL] Failed to write log to PostgreSQL:', err.message);
