@@ -4,7 +4,7 @@ const doc = {
     info: {
         title: 'Sec-Bank Secure API', description: 'Automatically generated documentation',
     },
-    host: 'owasp-sec-bank-insecure.onrender.com',
+    host: 'owasp-sec-bank-secure.onrender.com',
     schemes: ['https'],
     securityDefinitions: {
         bearerAuth: {

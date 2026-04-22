@@ -1,7 +1,7 @@
 const https = require('https');
 
 // Configuration
-const LOGIN_URL = 'https://owasp-sec-bank-insecure.onrender.com/api/auth/login';
+const LOGIN_URL = 'https://owasp-sec-bank-secure.onrender.com/api/auth/login';
 const PAYLOAD = JSON.stringify({
     username: 'username',
     password: 'password'

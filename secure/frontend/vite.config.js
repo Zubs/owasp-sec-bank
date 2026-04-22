@@ -8,12 +8,12 @@ export default defineConfig({
         port: 5173,
         proxy: {
             '/api': {
-                target: 'https://owasp-sec-bank-insecure.onrender.com',
+                target: 'https://owasp-sec-bank-secure.onrender.com',
                 changeOrigin: true,
                 secure: false,
             },
             '/uploads': {
-                target: 'https://owasp-sec-bank-insecure.onrender.com',
+                target: 'https://owasp-sec-bank-secure.onrender.com',
                 changeOrigin: true,
                 secure: false,
             }

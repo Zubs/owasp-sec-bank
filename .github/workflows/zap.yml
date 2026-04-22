@@ -8,49 +8,50 @@ on:
 jobs:
   zap_api_scan:
     runs-on: ubuntu-latest
-    name: Scan the Backend API
+    name: Scan ${{ matrix.environment.name }} API
     permissions:
       contents: read
       issues: write
+
+    strategy:
+      matrix:
+        environment:
+          - name: 'Insecure'
+            path_prefix: 'insecure'
+            url: 'https://owasp-sec-bank-insecure.onrender.com'
+          - name: 'Secure'
+            path_prefix: 'secure'
+            url: 'https://owasp-sec-bank-secure.onrender.com'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. Fix Permissions for Docker
-      # This allows the ZAP Docker container to write the report file to the disk
       - name: Fix Permissions
         run: chmod -R 777 .
 
-      # 2. Get Auth Token
-      # Runs your script to log in and save the token to the environment
       - name: Fetch JWT Token
-        run: node insecure/backend/scripts/get_token.js
+        run: node ${{ matrix.environment.path_prefix }}/backend/scripts/get_token.js
 
-      # 3. Run ZAP API Scan
-      # We removed the 'sed' step because you fixed the swagger.json source!
+      # 3. Run ZAP
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
           format: openapi
-          # Point to your local swagger file
-          target: 'insecure/backend/swagger.json'
-          # The Base URL of your API
-          target_url: 'https://owasp-sec-bank-insecure.onrender.com'
-
+          target: '${{ matrix.environment.path_prefix }}/backend/swagger.json'
+          target_url: '${{ matrix.environment.url }}'
           fail_action: false
           allow_issue_writing: false
-          cmd_options: '-r zap_report.html'
-
+          # Output specific file names so they don't overwrite each other
+          cmd_options: '-r zap_${{ matrix.environment.name }}_report.html'
         env:
-          # ZAP reads these env vars to inject headers automatically
           ZAP_AUTH_HEADER: "Authorization"
-          # This variable was set by our node script in step 2
           ZAP_AUTH_HEADER_VALUE: ${{ env.ZAP_AUTH_HEADER_VALUE }}
 
+      # 4. Upload the report
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ZAP-API-Report
-          path: zap_report.html
+          name: ZAP-${{ matrix.environment.name }}-Report
+          path: zap_${{ matrix.environment.name }}_report.html

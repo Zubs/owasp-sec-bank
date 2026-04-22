@@ -1,19 +1,75 @@
-name: Build
+name: SonarQube Scans & HTML Reports
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
   sonarqube:
-    name: SonarQube
+    name: SonarQube Scans & Export
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarQube Scan
+          fetch-depth: 0
+
+      # 1. SCAN THE INSECURE VERSION
+      - name: SonarQube Scan (Insecure)
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=Zubs_owasp-sec-bank_insecure
+            -Dsonar.projectName="Sec-Bank (Insecure)"
+            -Dsonar.sources=insecure
+
+      # 2. SCAN THE SECURE VERSION
+      - name: SonarQube Scan (Secure)
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_SECURE }}
+        with:
+          args: >
+            -Dsonar.projectKey=Zubs_owasp-sec-bank_secure
+            -Dsonar.projectName="Sec-Bank (Secure)"
+            -Dsonar.sources=secure
+
+      # 3. SET UP NODE.JS FOR THE REPORTER TOOL
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 4. GENERATE THE HTML REPORTS
+      - name: Generate SonarQube HTML Reports
+        run: |
+          # Install the community HTML exporter
+          npm install -g sonar-report
+          
+          # Wait a few seconds to ensure SonarCloud has finished processing the background tasks
+          sleep 15
+          
+          # Export Insecure Report to HTML
+          sonar-report \
+            --sonarurl="https://sonarcloud.io" \
+            --sonarcomponent="Zubs_owasp-sec-bank_insecure" \
+            --sonartoken="${{ secrets.SONAR_TOKEN }}" \
+            --allbugs=true > sonar_insecure_report.html
+          
+          # Export Secure Report to HTML
+          sonar-report \
+            --sonarurl="https://sonarcloud.io" \
+            --sonarcomponent="Zubs_owasp-sec-bank_secure" \
+            --sonartoken="${{ secrets.SONAR_TOKEN_SECURE }}" \
+            --allbugs=true > sonar_secure_report.html
+
+      # 5. UPLOAD THE ARTIFACTS TO GITHUB
+      - name: Upload SonarQube HTML Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: SonarQube-Comparative-Reports
+          path: |
+            sonar_insecure_report.html
+            sonar_secure_report.html

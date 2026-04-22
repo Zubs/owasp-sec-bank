@@ -17,6 +17,14 @@ direct comparison of vulnerability behavior and mitigation effectiveness.
 - Backend: Expressjs
 - Database: PostgresQL
 
+## Links
+- Insecure backend: https://owasp-sec-bank-insecure.onrender.com
+- Insecure database: postgresql://owasp_sec_bank_insecure_q3x3_user:J0SRAEjg4V9VbMKasLkpGMaGpb3XupuT@dpg-d7ki7oqqqhas73blitlg-a/owasp_sec_bank_insecure_q3x3
+- Insecure frontend: https://owasp-insecure.netlify.app
+- Secure backend: https://owasp-sec-bank-secure.onrender.com
+- Secure database: postgresql://postgres.kqjndpxeihbahfkryuxb:buwjav-mYdwen-huvwe7@aws-0-eu-west-1.pooler.supabase.com:5432/postgres
+- Secure frontend: https://owasp-secure.netlify.app
+
 ## Testing and Documentation
 
 ### Insecure
@@ -25,8 +33,6 @@ direct comparison of vulnerability behavior and mitigation effectiveness.
 
 - [Postman](https://documenter.getpostman.com/view/33365941/2sBXVZpuxT)
 - Swagger: Run the app and go to `/api-docs`
-- [Netlify](https://owasp-insecure.netlify.app)
-- [Render](https://owasp-sec-bank-insecure.onrender.com)
 
 ### Secure
 
