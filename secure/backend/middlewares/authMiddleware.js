@@ -1,8 +1,16 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
+const JWT_SECRET = process.env.JWT_SECRET;
 
-module.exports = async (req, res, next) => {
+if (!JWT_SECRET) {
+    throw new Error('FATAL: JWT_SECRET environment variable is not set.');
+}
+
+module.exports = async (
+    req,
+    res,
+    next
+) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
         return res.status(401).json({ message: 'No token provided' });
@@ -14,9 +22,11 @@ module.exports = async (req, res, next) => {
     }
 
     try {
-        const query = `SELECT * FROM tokens WHERE token = '${token}'`;
-        const result = await pool.query(query);
+        const query = `SELECT *
+                       FROM tokens
+                       WHERE token = $1`;
 
+        const result = await pool.query(query, [token]);
         if (result.rows.length === 0) {
             return res.status(401).json({ message: 'Session expired or logged out' });
         }
@@ -25,10 +35,12 @@ module.exports = async (req, res, next) => {
             if (err) {
                 if (err.name === 'TokenExpiredError') {
                     try {
-                        await pool.query(`DELETE FROM tokens WHERE token = '${token}'`);
+                        await pool.query(`DELETE
+                                          FROM tokens
+                                          WHERE token = $1`, [token]);
                         return res.status(401).json({ message: 'Token expired' });
                     } catch (dbError) {
-                        return res.status(500).json({ error: dbError.message });
+                        return next(dbError);
                     }
                 }
 
@@ -36,9 +48,10 @@ module.exports = async (req, res, next) => {
             }
 
             req.user = decoded;
+
             next();
         });
     } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+        next(error);
     }
 };

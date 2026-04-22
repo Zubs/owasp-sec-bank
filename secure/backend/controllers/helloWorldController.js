@@ -3,7 +3,6 @@ const logger = require('../utils/logger');
 
 exports.getStatus = async (req, res, next) => {
     try {
-        // Simple query to validate DB connection
         await pool.query('SELECT 1');
 
         logger.info(`System health check accessed`, {
@@ -12,10 +11,10 @@ exports.getStatus = async (req, res, next) => {
         });
 
         res.status(200).json({
-            message: "Hello World, everything is operational",
-            db: "ok",
+            message: 'Everything is operational',
+            db: 'ok',
+            timestamp: new Date().toISOString(),
             env: process.env.NODE_ENV,
-            timestamp: new Date().toISOString()
         });
     } catch (error) {
         next(error);

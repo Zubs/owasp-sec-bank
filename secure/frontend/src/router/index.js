@@ -1,0 +1,65 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import DashboardView from '../views/DashboardView.vue'
+import TransferView from '../views/TransferView.vue'
+import ProfileView from '../views/ProfileView.vue';
+import AdminView from '../views/AdminView.vue';
+import { useAuthStore } from '../stores/authStore'
+
+const router = createRouter({
+    history: createWebHistory(import.meta.env.BASE_URL),
+    routes: [
+        {
+            path: '/login',
+            name: 'login',
+            component: LoginView
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: RegisterView
+        },
+        {
+            path: '/',
+            name: 'dashboard',
+            component: DashboardView,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/transfer',
+            name: 'transfer',
+            component: TransferView,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/profile',
+            name: 'profile',
+            component: ProfileView,
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/admin',
+            name: 'admin',
+            component: AdminView,
+            meta: { requiresAuth: true, requiresAdmin: true }
+        },
+    ]
+})
+
+router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore();
+
+    // Unauthenticated users get redirected to login
+    if (to.meta.requiresAuth && !authStore.token) {
+        return next('/login');
+    }
+
+    if (to.meta.requiresAdmin && authStore.user?.role !== 'admin') {
+        return next('/');
+    }
+
+    next();
+});
+
+export default router;
