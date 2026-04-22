@@ -14,6 +14,7 @@ jobs:
       issues: write
 
     strategy:
+      fail-fast: false
       matrix:
         environment:
           - name: 'Insecure'
@@ -33,7 +34,6 @@ jobs:
       - name: Fetch JWT Token
         run: node ${{ matrix.environment.path_prefix }}/backend/scripts/get_token.js
 
-      # 3. Run ZAP
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
         with:
@@ -42,16 +42,13 @@ jobs:
           target_url: '${{ matrix.environment.url }}'
           fail_action: false
           allow_issue_writing: false
-          # Output specific file names so they don't overwrite each other
-          cmd_options: '-r zap_${{ matrix.environment.name }}_report.html'
         env:
           ZAP_AUTH_HEADER: "Authorization"
           ZAP_AUTH_HEADER_VALUE: ${{ env.ZAP_AUTH_HEADER_VALUE }}
 
-      # 4. Upload the report
       - name: Upload HTML Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ZAP-${{ matrix.environment.name }}-Report
-          path: zap_${{ matrix.environment.name }}_report.html
+          path: report_html.html
