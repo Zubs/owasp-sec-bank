@@ -53,16 +53,16 @@ jobs:
           # Export Insecure Report to HTML
           sonar-report \
             --sonarurl="https://sonarcloud.io" \
+            --sonarorganization="greatzubs" \
             --sonarcomponent="Zubs_owasp-sec-bank_insecure" \
-            --sonartoken="${{ secrets.SONAR_TOKEN }}" \
-            --allbugs=true > sonar_insecure_report.html
+            --sonartoken="${{ secrets.SONAR_TOKEN }}" > sonar_insecure_report.html
           
           # Export Secure Report to HTML
           sonar-report \
             --sonarurl="https://sonarcloud.io" \
+            --sonarorganization="greatzubs" \
             --sonarcomponent="Zubs_owasp-sec-bank_secure" \
-            --sonartoken="${{ secrets.SONAR_TOKEN_SECURE }}" \
-            --allbugs=true > sonar_secure_report.html
+            --sonartoken="${{ secrets.SONAR_TOKEN_SECURE }}" > sonar_secure_report.html
 
       # 5. UPLOAD THE ARTIFACTS TO GITHUB
       - name: Upload SonarQube HTML Reports
