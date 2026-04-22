@@ -10,8 +10,16 @@ import { useAuthStore } from '../stores/authStore'
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
-        { path: '/login', name: 'login', component: LoginView },
-        { path: '/register', name: 'register', component: RegisterView },
+        {
+            path: '/login',
+            name: 'login',
+            component: LoginView
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: RegisterView
+        },
         {
             path: '/',
             name: 'dashboard',
@@ -34,19 +42,24 @@ const router = createRouter({
             path: '/admin',
             name: 'admin',
             component: AdminView,
-            meta: { requiresAuth: true }
+            meta: { requiresAuth: true, requiresAdmin: true }
         },
     ]
 })
 
-// Navigation Guard
 router.beforeEach((to, from, next) => {
     const authStore = useAuthStore();
+
+    // Unauthenticated users get redirected to login
     if (to.meta.requiresAuth && !authStore.token) {
-        next('/login');
-    } else {
-        next();
+        return next('/login');
     }
+
+    if (to.meta.requiresAdmin && authStore.user?.role !== 'admin') {
+        return next('/');
+    }
+
+    next();
 });
 
 export default router;
