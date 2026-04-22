@@ -41,28 +41,70 @@ jobs:
         with:
           node-version: '20'
 
-      # 4. GENERATE THE HTML REPORTS
+      # 4. GENERATE THE HTML REPORTS (CUSTOM SCRIPT)
       - name: Generate SonarQube HTML Reports
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN_SECURE: ${{ secrets.SONAR_TOKEN_SECURE }}
         run: |
-          # Install the community HTML exporter
-          npm install -g sonar-report
+          # Wait 30 seconds to ensure SonarCloud has finished processing the scan on their servers
+          sleep 30
           
-          # Wait a few seconds to ensure SonarCloud has finished processing the background tasks
-          sleep 15
+          # Create a bulletproof Node.js script to fetch the data and build the HTML
+          cat << 'EOF' > generate_report.js
+          const https = require('https');
+          const fs = require('fs');
+
+          function fetchIssues(component, token, outputFile, title) {
+            const options = {
+              hostname: 'sonarcloud.io',
+              path: `/api/issues/search?organization=greatzubs&componentKeys=${component}&ps=500`,
+              method: 'GET',
+              headers: {
+                'Authorization': 'Basic ' + Buffer.from(token + ':').toString('base64')
+              }
+            };
+
+            https.get(options, (res) => {
+              let data = '';
+              res.on('data', chunk => data += chunk);
+              res.on('end', () => {
+                const json = JSON.parse(data);
+                if(!json.issues) {
+                   console.error(`Error fetching data for ${component}:`, json);
+                   return;
+                }
           
-          # Export Insecure Report to HTML
-          sonar-report \
-            --sonarurl="https://sonarcloud.io" \
-            --sonarorganization="greatzubs" \
-            --sonarcomponent="Zubs_owasp-sec-bank_insecure" \
-            --sonartoken="${{ secrets.SONAR_TOKEN }}" > sonar_insecure_report.html
+                // Build a beautiful HTML Table
+                let html = `<!DOCTYPE html><html><head><title>${title}</title>`;
+                html += `<style>body{font-family: Arial, sans-serif; margin: 40px;} table{width: 100%; border-collapse: collapse; margin-top: 20px;} th, td{padding: 12px; border: 1px solid #ddd; text-align: left;} th{background-color: #007bff; color: white;} tr:nth-child(even){background-color: #f2f2f2;} .severity-CRITICAL, .severity-HIGH{color: #d9534f; font-weight: bold;}</style></head><body>`;
+                html += `<h1>${title}</h1>`;
+                html += `<p><strong>Total Vulnerabilities & Code Smells Found:</strong> ${json.total}</p>`;
+                html += `<table><tr><th>Type</th><th>Severity</th><th>Message</th><th>File</th><th>Line</th></tr>`;
           
-          # Export Secure Report to HTML
-          sonar-report \
-            --sonarurl="https://sonarcloud.io" \
-            --sonarorganization="greatzubs" \
-            --sonarcomponent="Zubs_owasp-sec-bank_secure" \
-            --sonartoken="${{ secrets.SONAR_TOKEN_SECURE }}" > sonar_secure_report.html
+                json.issues.forEach(issue => {
+                  const fileName = issue.component.split(':').pop(); // Cleans up the file path
+                  html += `<tr><td>${issue.type}</td><td class="severity-${issue.severity}">${issue.severity}</td><td>${issue.message}</td><td>${fileName}</td><td>${issue.line || 'N/A'}</td></tr>`;
+                });
+          
+                html += `</table></body></html>`;
+          
+                fs.writeFileSync(outputFile, html);
+                console.log(`Successfully generated ${outputFile} with ${json.issues.length} issues.`);
+              });
+            }).on('error', console.error);
+          }
+
+          // Execute the function for both versions
+          fetchIssues('Zubs_owasp-sec-bank_insecure', process.env.SONAR_TOKEN, 'sonar_insecure_report.html', 'SonarCloud Report - Insecure Version');
+          fetchIssues('Zubs_owasp-sec-bank_secure', process.env.SONAR_TOKEN_SECURE, 'sonar_secure_report.html', 'SonarCloud Report - Secure Version');
+          EOF
+          
+          # Run the script we just created
+          node generate_report.js
+          
+          # Give Node a few seconds to write the files to the disk
+          sleep 5
 
       # 5. UPLOAD THE ARTIFACTS TO GITHUB
       - name: Upload SonarQube HTML Reports
