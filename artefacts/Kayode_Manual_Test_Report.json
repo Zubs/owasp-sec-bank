@@ -1,0 +1,48 @@
+[
+  {
+    "date": "2026-04-23",
+    "tester_name": "Kayode Oluwalusi",
+    "target_feature": "Login",
+    "target_vulnerability": "A03:2021-Injection (SQL Injection)",
+    "payload_action_taken": {
+      "email": "bigbat@gmail.com",
+      "password": "' OR '1'='1' --"
+    },
+    "time_taken_to_test_minutes": 5,
+    "ease_of_discovery_exploitation": 5,
+    "outcome_version_a": "Successfully bypassed authentication and logged into the application.",
+    "outcome_version_b": "Login failed. Received generic 'Invalid credentials' error message.",
+    "general_notes": "Version A is highly susceptible to tautology-based SQLi. Version B appears to use parameterized queries, as the payload was treated as a literal string."
+  },
+  {
+    "date": "2026-04-24",
+    "tester_name": "Kayode Oluwalusi",
+    "target_feature": "Account Lookup",
+    "target_vulnerability": "A03:2021-Injection (Stacked Queries / Financial Fraud)",
+    "payload_action_taken": "83837619'; UPDATE accounts SET balance = 1000000 WHERE account_id = 9; --",
+    "time_taken_to_test_minutes": 15,
+    "ease_of_discovery_exploitation": 5,
+    "outcome_version_a": "Successful exploitation. Although the UI returned a 'Cannot read properties of undefined (reading length)' error, the database executed the stacked query and updated the balance of account_id 9 to 1,000,000.",
+    "outcome_version_b": "Returned 'Account not found'. The balance remained unchanged, confirming that the secure version uses parameterized queries that do not support stacked statements.",
+    "general_notes": "The error on the insecure side occurred because the backend code expected a single result array but received multiple result sets from the database. Despite the crash, the data modification was permanent."
+  },
+  [
+    {
+      "date": "2026-04-24",
+      "tester_name": "Kayode Oluwalusi",
+      "target_feature": "Edit User Information",
+      "target_vulnerability": "A03:2021-Injection (Stored XSS)",
+      "payload_action_taken": {
+        "full_name": "<script>alert(`Stored XSS Found!`);</script>",
+        "email": "bat@gmail.com",
+        "username": "bat_test_xss",
+        "password": ""
+      },
+      "time_taken_to_test_minutes": 15,
+      "ease_of_discovery_exploitation": 5,
+      "outcome_version_a": "The script was successfully stored in the database. Upon reloading the profile page, the browser executed the script and displayed an alert box.",
+      "outcome_version_b": "The application sanitized the input or encoded the output. The literal characters '<script>...' were displayed on the screen as plain text with no execution.",
+      "general_notes": "Version A is vulnerable because it fails to encode user-supplied data before rendering it in the DOM. Using backticks (`) in the payload was necessary to avoid breaking the backend SQL query's single-quote structure."
+    }
+  ]
+]

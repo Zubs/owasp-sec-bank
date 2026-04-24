@@ -1,0 +1,62 @@
+[
+  {
+    "id": "TC-001",
+    "date": "2026-04-23",
+    "tester": "QA Tester",
+    "target_feature": "Authentication - Login",
+    "target_vulnerability": "A07: Identification and Authentication Failures",
+    "payload_action": "Attempted login with multiple valid credential combinations including different emails and password formats",
+    "time_taken_minutes": 10,
+    "ease_of_discovery": null,
+    "outcome_version_a_insecure": "Login works after double-clicking the signup button — unclear if this is a UI bug or a race condition on the request",
+    "outcome_version_b_secure": "FAIL — Could not log in at all with any credentials tried. Tested multiple email and password combinations. Secure version appears to have a login bug blocking all authentication",
+    "owasp_category": "A07",
+    "status": "BUG",
+    "notes": "Secure version login is completely broken for normal users — this needs to be investigated by dev before further testing of secure version is possible. Insecure version required a double-click to trigger signup which suggests a frontend event handling issue, possibly the button submitting twice or the first click not registering."
+  },
+  {
+    "id": "TC-002",
+    "date": "2026-04-23",
+    "tester": "QA Tester",
+    "target_feature": "Profile - Avatar / Image Upload",
+    "target_vulnerability": "A10: Server-Side Request Forgery (SSRF)",
+    "payload_action": "Attempted to change profile image via the avatar upload feature on insecure version",
+    "time_taken_minutes": 5,
+    "ease_of_discovery": 4,
+    "outcome_version_a_insecure": "FAIL — Could not change the profile image at all. Feature appears broken. No image URL was accepted or displayed",
+    "outcome_version_b_secure": "Not tested — secure login is blocked (see TC-001)",
+    "owasp_category": "A10",
+    "status": "BUG",
+    "notes": "Image upload not functional on insecure version. Cannot test SSRF vulnerability as intended because the feature itself does not work. Dev needs to investigate whether the uploads directory is configured correctly and whether the avatar URL endpoint is reachable."
+  },
+  {
+    "id": "TC-003",
+    "date": "2026-04-23",
+    "tester": "QA Tester",
+    "target_feature": "Profile - Update Email",
+    "target_vulnerability": "A03: Injection / A05: Security Misconfiguration",
+    "payload_action": "Entered an invalid/malformed email address in the profile update form and saved",
+    "time_taken_minutes": 5,
+    "ease_of_discovery": 5,
+    "outcome_version_a_insecure": "EXPLOITED — Invalid email was accepted and saved to the profile with no validation. No format check on the backend at all",
+    "outcome_version_b_secure": "Not tested — secure login is blocked (see TC-001)",
+    "owasp_category": "A05",
+    "status": "CONFIRMED VULNERABILITY",
+    "notes": "Insecure version accepts any string as an email with no server-side validation. This is expected behaviour for the insecure version and confirms the lack of input validation. Secure version should reject this via the Joi updateProfileSchema email validator — needs to be re-tested once TC-001 login bug is resolved."
+  },
+  {
+    "id": "TC-004",
+    "date": "2026-04-23",
+    "tester": "QA Tester",
+    "target_feature": "Money Transfer - Account Lookup",
+    "target_vulnerability": "A03: Injection / A01: Broken Access Control",
+    "payload_action": "Attempted to look up recipient accounts using account numbers of various lengths: 7, 10, 11, and 15 digits",
+    "time_taken_minutes": 10,
+    "ease_of_discovery": 3,
+    "outcome_version_a_insecure": "FAIL — Could not find any account regardless of the number length used. None of the lookup attempts returned a valid account. Could not proceed to test the transfer flow",
+    "outcome_version_b_secure": "Not tested — secure login is blocked (see TC-001)",
+    "owasp_category": "A03",
+    "status": "BUG / BLOCKED",
+    "notes": "Account numbers in this app are generated as 8 digits (10000000 to 99999999 range per the source code). Testing with 7, 10, 11, 15 digit numbers is correct boundary testing but a valid 8-digit account number from a registered test account is needed to confirm the lookup works at all. Recommend dev provides a seeded test account or tester registers a second account and uses that account number. Transfer IDOR and SQL injection tests are blocked until this is resolved."
+  }
+]

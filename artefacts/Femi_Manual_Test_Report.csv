@@ -1,0 +1,31 @@
+Date,Name,Target Feature,Target Vulnerability,Payload / Action Taken,Time Taken to Test,Ease of Discovery / Exploitation (Scale 1-5),Outcome Version A,Outcome Version B,General Notes/Observations
+2026-04-23,Femi,Register,A01: Broken Registration,"{""username"":""ayosalal"",""password"":""12345"",""full_name"":""Ayo Salal"",""email"":""ayosalal@gmai.com""}",-,5=Very Easy,"{
+    ""error"": ""duplicate key value violates unique constraint \""users_pkey\"""",
+    ""detail"": {
+        ""length"": 185,
+        ""name"": ""error"",
+        ""severity"": ""ERROR"",
+        ""code"": ""23505"",
+        ""detail"": ""Key (user_id)=(1) already exists."",
+        ""schema"": ""public"",
+        ""table"": ""users"",
+        ""constraint"": ""users_pkey"",
+        ""file"": ""nbtinsert.c"",
+        ""line"": ""666"",
+        ""routine"": ""_bt_check_unique""
+    }
+}",Blocked,
+2026-04-23,Femi,"Tranfer - Same Account Number, CREDITING MYSELT",A02: Broken Transfer,"{""from_account_id"":1,""to_account_id"":1,""amount"":-1000,""description"":""well well""}",5 sec,5= Very Easy,"{
+    ""message"": ""Transfer successful"",
+    ""transaction"": {
+        ""transaction_id"": 1,
+        ""from_account_id"": 1,
+        ""to_account_id"": 1,
+        ""amount"": ""-1000.00"",
+        ""description"": ""well well"",
+        ""status"": ""completed"",
+        ""timestamp"": ""2026-04-23T11:40:46.177Z""
+    }
+}",,"Looked up my own account, then transferred a negative amount of - 1000 pounds, the transaction was successful and it shows the transaction, my 100 pound balance did not change."
+2026-04-23,Femi,Hardcoded JWT Secret,A03: Serious Vulnerability,https://github.com/Zubs/owasp-sec-bank/blob/main/insecure/backend/controllers/authController.js,,5= Very Easy,const JWT_SECRET = 'super_secret_key_123';,,
+2026-04-23,Femi,SERIAL PRIMARY KEY,"A04:  user_id , account_id, transaction_id",https://github.com/Zubs/owasp-sec-bank/blob/main/insecure/backend/migrations/1766508498819_init-schema.js,,5= Very Easy,Integer Key Values,UUID Key,
